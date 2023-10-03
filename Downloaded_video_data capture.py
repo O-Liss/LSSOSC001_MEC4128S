@@ -19,7 +19,7 @@ def main():
     # Analysis video
     create_video('/Users/oscarliss/Desktop/LSSOSC001_MEC4128S/Practice data/Visual /video01.mp4', threshold, factor, x_shift, y_shift, trans_width, trans_height)
 
-
+    plotting()
 
 
 if __name__ == "__main__":

@@ -193,7 +193,7 @@ def perspective_transform(image, factor, x, y):
     perspective_transform = cv2.getPerspectiveTransform(point_matrix, converted_points)
     image_trans = cv2.warpPerspective(image, perspective_transform, (width, height))
 
-    # Draw lines to combine the points
+    # Draw lines to combine the points after the transform has taken place
     cv2.line(image, (int(T_L[0]), int(T_L[1])), (int(T_R[0]), int(T_R[1])), (0, 0, 255), 2)
     cv2.line(image, (int(B_L[0]), int(B_L[1])), (int(T_L[0]), int(T_L[1])), (0, 0, 255), 2)
     cv2.line(image, (int(B_R[0]), int(B_R[1])), (int(B_L[0]), int(B_L[1])), (0, 0, 255), 2)
@@ -257,7 +257,7 @@ def set_threshold():
 
     return threshold
 
-def find_outliers(contours, data_area, sensitivity=1.5):
+def find_outliers(contours, data_area, sensitivity=5):
     """
     This function is used to remove the outliers from the contours
     :param contours: the contours
@@ -269,15 +269,15 @@ def find_outliers(contours, data_area, sensitivity=1.5):
     # Calculates the mean, standard deviation and upper and lower boundaries for inliers.
     m = np.mean(data_area)
     st_dev = statistics.stdev(data_area)
-    u_bound = math.floor(m + sensitivity * st_dev)
-    l_bound = math.ceil(m - sensitivity * st_dev)
+    u_bound = m + sensitivity * st_dev
+    l_bound = m - sensitivity * st_dev
 
     inliers_contours = []
     outliers_contours = []
     inliers_areas = []
-    # Remove the upper bound outliers form the data and contours append outliers contour to outliers list
+    # Remove the upper and lower bound outliers form the data and contours append outliers contour to outliers list
     for i in range(len(data_area)):
-        if data_area[i] > u_bound:
+        if (data_area[i] > u_bound) or (data_area[i] < l_bound):
             # Creates outliers list
             outliers_contours.append(contours[i])
 
@@ -289,7 +289,7 @@ def find_outliers(contours, data_area, sensitivity=1.5):
 
 
     # Calculate the number of inliers and outliers
-    num_inliers = len(contours)
+    num_inliers = len(inliers_contours)
     num_outliers = len(outliers_contours)
 
     return tuple(inliers_contours), tuple(outliers_contours), inliers_areas, num_inliers, num_outliers
@@ -339,7 +339,7 @@ def analysis(frame, threshold, factor, x_shift, y_shift, frame_no):
         adjusted_contour_area.append(area / pixel_area_ratio)
 
     # Find the outliers
-    contours, outliers_contours, inliers_areas, num_inliers, num_outliers = find_outliers(contours, raw_contour_area, sensitivity=1.5)
+    contours, outliers_contours, inliers_areas, num_inliers, num_outliers = find_outliers(contours, raw_contour_area)
 
     # Draw contours inliers
     cv2.drawContours(image_trans, contours, -1, (0, 255, 0), 1)
@@ -362,7 +362,7 @@ def analysis(frame, threshold, factor, x_shift, y_shift, frame_no):
         elif area > 200:
             frazil += 1
 
-    SIC = round(100 * (sum(raw_contour_area)) / ((image_trans.shape[0]) * image_trans.shape[1] / 700), 2)
+    SIC = round(100 * (sum(raw_contour_area)/pixel_area_ratio) / ((image_trans.shape[0]) * image_trans.shape[1] / 700), 2)
     time = '2023-09-30 12:00:00'  # Replace with actual time from camera
 
     cv2.putText(frame, str("Number of contours = " + str(num_inliers)), (width-450, 100), font, 0.8, (0, 0, 255))
@@ -411,20 +411,37 @@ def create_video(videofile, threshold, factor, x_shift, y_shift, trans_width,  t
 
 def plotting():
     # Read the data from the log file using pandas
-    log_data = pd.read_csv('sea_ice_data.log', header=None, names=['Timestamp', 'Level', 'Data'])
+    # log_data = pd.read_csv('sea_ice_data.log', header=None, names=['Timestamp', 'Level', 'Data'])
+    #
+    # # Extract the relevant columns
+    # log_data['Frame Number'] = log_data['Data'].str.extract(r'Frame (\d+):').astype(float)
+    # log_data['Concentration'] = log_data['Data'].str.extract(r'Concentration=([\d.]+),').astype(float)
 
-    # Extract the relevant columns
-    log_data['Frame Number'] = log_data['Data'].str.extract(r'Frame (\d+):').astype(float)
-    log_data['Concentration'] = log_data['Data'].str.extract(r'Concentration=([\d.]+),').astype(float)
+    log_lines = []
+    frames = []
+    concs = []
 
-    # Extract 'Time' separately and convert to datetime
-    time_extract = log_data['Data'].str.extract(r'Time=([^,]+)')
-    log_data['Time'] = pd.to_datetime(time_extract[0], format='%Y-%m-%d %H:%M:%S', errors='coerce')
+    # Open the log file for reading
+    with open('sea_ice_data.log', 'r') as file:
+        # Read each line and append it to the list
+        for line in file:
+            log_lines.append(line.strip())
+
+    for line in log_lines:
+        frame_start = line.find('Frame ') + 6
+        frame_end = line.find(': Num_Contours')
+        frame = float(line[frame_start:frame_end])
+        frames.append(frame)
+        conc_start = line.find("Concentration=") + 14
+        conc_end = line.find(", Pancake_no")
+        conc = float(line[conc_start:conc_end])
+        concs.append(conc)
+
 
     # Plot the data using matplotlib
     plt.figure(figsize=(10, 6))
     plt.grid(True)
-    plt.plot(log_data['Frame Number'], log_data['Concentration'], label='Sea Ice Concentration')
+    plt.plot(frames, concs, label='Sea Ice Concentration')
     plt.xlabel('Frame number')
     plt.ylabel('Concentration')
     plt.legend()
