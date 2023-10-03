@@ -8,7 +8,7 @@ from skimage.util import img_as_float
 
 
 # Load the grayscale image
-image = cv2.imread('/Users/oscarliss/Desktop/LSSOSC001_MEC4128S/Practice data/real_ice.png', cv2.IMREAD_GRAYSCALE)
+image = cv2.imread('/Users/oscarliss/Desktop/LSSOSC001_MEC4128S/image_trans.jpg', cv2.IMREAD_GRAYSCALE)
 
 # Perform K-means clustering to segment the image into 3 clusters
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.2)
@@ -44,7 +44,7 @@ distance_transform = cv2.distanceTransform(inverted_binary_ice_image, cv2.DIST_L
 
 cv2.imshow('distance', distance_transform)
 # Define a threshold for merging seeds (Tseed)
-Tseed = 10  # Adjust this threshold as needed
+Tseed = 5  # Adjust this threshold as needed
 
 
 # Find regional maxima and merge them
@@ -111,7 +111,7 @@ def store_evolution_in(lst):
 
 
 # Load the grayscale image
-im = cv2.imread('/Users/oscarliss/Desktop/LSSOSC001_MEC4128S/Practice data/real_ice.png', cv2.IMREAD_GRAYSCALE)
+im = cv2.imread('/Users/oscarliss/Desktop/LSSOSC001_MEC4128S/image_trans.jpg', cv2.IMREAD_GRAYSCALE)
 
 # Preprocess the image to highlight contours
 gimage = inverse_gaussian_gradient(im)
@@ -128,7 +128,7 @@ evolution = []
 callback = store_evolution_in(evolution)
 
 # Morphological GAC, balloon
-ls = morphological_geodesic_active_contour(gimage, 200, init_ls, smoothing=1, balloon=5, threshold=0.7, iter_callback=callback)
+ls = morphological_geodesic_active_contour(gimage, 300, init_ls, smoothing=1, balloon=5, threshold=0.7, iter_callback=callback)
 
 fig, axes = plt.subplots(1, 2, figsize=(8, 8))
 ax = axes.flatten()
