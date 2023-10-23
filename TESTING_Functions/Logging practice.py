@@ -13,7 +13,7 @@ print("start")
 # Configure logging to write to a log file
 logging.basicConfig(
     level=logging.INFO,
-    filename='sea_ice_data.log',
+    filename='../sea_ice_data.log',
     filemode='w',
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
@@ -29,7 +29,7 @@ for frame_number in range(1, 11):
     logging.info(log_message)
 
 # Read the data from the log file using pandas
-log_data = pd.read_csv('sea_ice_data.log', header=None, names=['Timestamp', 'Level', 'Data'], delim_whitespace=True)
+log_data = pd.read_csv('../sea_ice_data.log', header=None, names=['Timestamp', 'Level', 'Data'], delim_whitespace=True)
 
 # Extract 'Frame Number' and 'Concentration' as integers and floats, handling missing values gracefully
 log_data['Frame Number'] = pd.to_numeric(log_data['Data'].str.extract(r'Frame (\d+): Concentration=([\d.]+)').iloc[:, 0], errors='coerce')

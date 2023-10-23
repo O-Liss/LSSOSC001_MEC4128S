@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 # Load the grayscale image
-image = cv2.imread('/Practice data/ice_test.jpg', cv2.IMREAD_GRAYSCALE)
+image = cv2.imread('//Users/oscarliss/Desktop/LSSOSC001_MEC4128S/Practice data/Testers/ice_test.jpg', cv2.IMREAD_GRAYSCALE)
 
 # Perform K-means clustering to segment the image into 3 clusters
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.2)

@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 from skimage.segmentation import morphological_geodesic_active_contour, inverse_gaussian_gradient
 from skimage.color import rgb2gray
 from skimage.util import img_as_float
+import time
 
-
-
+start_time = time.time()
 # Load the grayscale image
 image = cv2.imread('/Users/oscarliss/Desktop/LSSOSC001_MEC4128S/image_trans.jpg', cv2.IMREAD_GRAYSCALE)
 
@@ -21,8 +21,8 @@ _, labels, centers = cv2.kmeans(pixel_values, k, None, criteria, 10, cv2.KMEANS_
 center = np.uint8(centers)
 res = center[labels.flatten()]
 res2 = res.reshape(image.shape)
-cv2.imshow('res2',res2)
-cv2.waitKey(0)
+#cv2.imshow('res2',res2)
+#cv2.waitKey(0)
 
 # Convert labels to image shape
 clustered_image = labels.reshape(image.shape).astype(np.uint8)
@@ -33,8 +33,8 @@ binary_ice_image[(clustered_image == 1) | (clustered_image == 2)] = 1
 binary_ice_image2 = np.zeros_like(clustered_image)
 binary_ice_image2[(clustered_image == 1) | (clustered_image == 2)] = 255
 
-cv2.imshow('bin ice image', binary_ice_image2)
-cv2.waitKey(0)
+#cv2.imshow('bin ice image', binary_ice_image2)
+#cv2.waitKey(0)
 
 # Invert the binary ice image to measure distance from ice to open water
 inverted_binary_ice_image = 1 - binary_ice_image
@@ -129,6 +129,9 @@ callback = store_evolution_in(evolution)
 
 # Morphological GAC, balloon
 ls = morphological_geodesic_active_contour(gimage, 300, init_ls, smoothing=1, balloon=5, threshold=0.7, iter_callback=callback)
+
+end_time = time.time()
+print("Time taken:", end_time - start_time)
 
 fig, axes = plt.subplots(1, 2, figsize=(8, 8))
 ax = axes.flatten()

@@ -3,11 +3,11 @@ import numpy as np
 from skimage.segmentation import active_contour
 
 # Load the grayscale image
-image = cv2.imread('/Practice data/IMG_1485.jpg', cv2.IMREAD_GRAYSCALE)
+image = cv2.imread('/Users/oscarliss/Desktop/LSSOSC001_MEC4128S/image_trans.jpg', cv2.IMREAD_GRAYSCALE)
 
 # Perform K-means clustering to segment the image into 3 clusters
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.2)
-k = 3
+k = 5
 pixel_values = np.float32(image.reshape(-1, 1))
 _, labels, centers = cv2.kmeans(pixel_values, k, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
 
@@ -19,8 +19,6 @@ binary_ice_image = np.zeros_like(clustered_image)
 binary_ice_image[(clustered_image == 1) | (clustered_image == 2)] = 1
 binary_ice_image2 = np.zeros_like(clustered_image)
 binary_ice_image2[(clustered_image == 1) | (clustered_image == 2)] = 255
-
-cv2.imshow('bin ice image', binary_ice_image2)
 
 # Invert the binary ice image to measure distance from ice to open water
 inverted_binary_ice_image = 1 - binary_ice_image

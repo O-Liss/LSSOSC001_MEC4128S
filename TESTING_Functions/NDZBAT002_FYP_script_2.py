@@ -6,6 +6,7 @@ from glob import glob
 import IPython.display as ipd
 from tqdm.notebook import tqdm
 import subprocess
+import time
 
 print("Start")
 
@@ -79,7 +80,7 @@ switch = 'color/gray'
 cv.createTrackbar(switch, 'image', 0, 1, nothing)
 
 while(1):
-    img = cv.imread("image_trans.jpg") #np.zeros((300,512,3), np.uint8) #
+    img = cv.imread("../image_trans.jpg") #np.zeros((300,512,3), np.uint8) #
     imgray=cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     
     
@@ -88,7 +89,7 @@ while(1):
     threshold1 =cv.getTrackbarPos("threshold1","image")
     #threshold2 = cv.getTrackbarPos("threshold2","image")    
     font = cv.FONT_HERSHEY_SIMPLEX
-    
+
     ret, thresh = cv.threshold(imgray, threshold1, 4,0)                      #detect only the specified range
     
     contours, hierarchy = cv.findContours(thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE) #Only retrieves the extrem outer contours 
